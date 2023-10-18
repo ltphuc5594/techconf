@@ -1,11 +1,10 @@
 from app import app, db, queue_client
 from datetime import datetime
-from app.models import Attendee, Conference, Notification
-from flask import render_template, session, request, redirect, url_for, flash, make_response, session
+from app.models import Attendee, Notification
+from flask import render_template, session, request, redirect, session
 from azure.servicebus import Message
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail
 import logging
+
 
 @app.route('/')
 def index():
@@ -30,7 +29,8 @@ def registration():
         try:
             db.session.add(attendee)
             db.session.commit()
-            session['message'] = 'Thank you, {} {}, for registering!'.format(attendee.first_name, attendee.last_name)
+            session['message'] = 'Thank you, {} {}, for registering!'.format(
+                attendee.first_name, attendee.last_name)
             return redirect('/Registration')
         except:
             logging.error('Error occured while saving your information')
@@ -41,7 +41,8 @@ def registration():
             session.pop('message', None)
             return render_template('registration.html', message=message)
         else:
-             return render_template('registration.html')
+            return render_template('registration.html')
+
 
 @app.route('/Attendees')
 def attendees():
@@ -53,6 +54,7 @@ def attendees():
 def notifications():
     notifications = Notification.query.order_by(Notification.id).all()
     return render_template('notifications.html', notifications=notifications)
+
 
 @app.route('/Notification', methods=['POST', 'GET'])
 def notification():
@@ -66,42 +68,11 @@ def notification():
         try:
             db.session.add(notification)
             db.session.commit()
-
-            ##################################################
-            ## TODO: Refactor This logic into an Azure Function
-            ## Code below will be replaced by a message queue
-            #################################################
-            attendees = Attendee.query.all()
-
-            for attendee in attendees:
-                subject = '{}: {}'.format(attendee.first_name, notification.subject)
-                send_email(attendee.email, subject, notification.message)
-
-            notification.completed_date = datetime.utcnow()
-            notification.status = 'Notified {} attendees'.format(len(attendees))
-            db.session.commit()
-            # TODO Call servicebus queue_client to enqueue notification ID
-
-            #################################################
-            ## END of TODO
-            #################################################
+            queue_client.send(Message(notification.id))
 
             return redirect('/Notifications')
-        except :
+        except:
             logging.error('log unable to save notification')
 
     else:
         return render_template('notification.html')
-
-
-
-def send_email(email, subject, body):
-    if not app.config.get('SENDGRID_API_KEY'):
-        message = Mail(
-            from_email=app.config.get('ADMIN_EMAIL_ADDRESS'),
-            to_emails=email,
-            subject=subject,
-            plain_text_content=body)
-
-        sg = SendGridAPIClient(app.config.get('SENDGRID_API_KEY'))
-        sg.send(message)

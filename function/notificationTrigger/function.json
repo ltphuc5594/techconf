@@ -1,0 +1,12 @@
+{
+  "scriptFile": "__init__.py",
+  "bindings": [
+    {
+      "type": "eventHubTrigger",
+      "name": "event",
+      "direction": "in",
+      "eventHubName": "event1",
+      "connection": "NEIGHBORLY_EVENT_HUB_CONNECTION_STRING"
+    }
+  ]
+}
