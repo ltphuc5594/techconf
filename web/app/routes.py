@@ -1,9 +1,10 @@
-from app import app, db, queue_client
-from datetime import datetime
-from app.models import Attendee, Notification
-from flask import render_template, session, request, redirect, session
-from azure.servicebus import Message
 import logging
+from datetime import datetime
+
+from app import app, db, queue_client
+from app.models import Attendee, Notification
+from azure.servicebus import Message
+from flask import render_template, request, redirect, session
 
 
 @app.route('/')
@@ -33,7 +34,7 @@ def registration():
                 attendee.first_name, attendee.last_name)
             return redirect('/Registration')
         except:
-            logging.error('Error occured while saving your information')
+            logging.error('Error occurred while saving your information')
 
     else:
         if 'message' in session:
@@ -68,11 +69,11 @@ def notification():
         try:
             db.session.add(notification)
             db.session.commit()
-            queue_client.send(Message(notification.id))
+            queue_client.send(Message(f"{notification.id}"))
 
             return redirect('/Notifications')
         except:
-            logging.error('log unable to save notification')
+            logging.error('Unable to save notification')
 
     else:
         return render_template('notification.html')

@@ -2,11 +2,11 @@
   "scriptFile": "__init__.py",
   "bindings": [
     {
-      "type": "eventHubTrigger",
-      "name": "event",
+      "name": "msg",
+      "type": "serviceBusTrigger",
       "direction": "in",
-      "eventHubName": "event1",
-      "connection": "NEIGHBORLY_EVENT_HUB_CONNECTION_STRING"
+      "queueName": "notification",
+      "connection": "TECHCONF_NOTIFICATION_CONNECTION_STRING"
     }
   ]
 }
