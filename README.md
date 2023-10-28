@@ -88,3 +88,16 @@ For basic/testing using, I just choose 'Basic' Service Tier. It optimizes the co
 For production using, we need to scale up Azure Function App and Azure Service App Plan by using 'Premium' Service Tier.
 It can adapt many active users that they access and register the events. Also, we need to scale update Azure Postgres
 Database by using 'Gen 5, 4 vCore(s), 100 GB' and Azure Service Bus by using 'Standard' Service Tier.
+
+**Azure Service App**
+
+We choose Azure Service to deploy Web App because it is cheaper than on-premise solutions and there are flexible plans
+to pay according to our needs. We can easy to scale up/out to adap many active users, high traffics. And we do not worry
+about the infrastructure, OS security,...
+
+**Azure Function App**
+
+In the traditional way, we will loop to send the email to all registers. It takes a long time to response and make the
+user experience is bad. We use Azure Function App (Serverless) to do the background job. It improves the performance and
+helps to avoid blocking the code execution and hence timeouts in the web app. Also, we do not have to worry about the
+infrastructure (serverless) and only pay for time spent for running the code.
